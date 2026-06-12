@@ -1,0 +1,171 @@
+openapi: 3.0.3
+info:
+  title: Task Tracker API
+  description: API для управления задачами и досками
+  version: 1.0.0
+  contact:
+    name: Дмитрий Мингалеев
+    email: grimmbo666@gmail.com
+
+servers:
+  - url: https://api.tasktracker.com/v1
+    description: Production server
+
+paths:
+  /boards:
+    get:
+      summary: Получить список досок
+      tags:
+        - Boards
+      responses:
+        '200':
+          description: Список досок
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Board'
+    
+    post:
+      summary: Создать новую доску
+      tags:
+        - Boards
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BoardCreate'
+      responses:
+        '201':
+          description: Доска создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Board'
+
+  /boards/{boardId}/cards:
+    get:
+      summary: Получить карточки доски
+      tags:
+        - Cards
+      parameters:
+        - name: boardId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Список карточек
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Card'
+    
+    post:
+      summary: Создать карточку
+      tags:
+        - Cards
+      parameters:
+        - name: boardId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardCreate'
+      responses:
+        '201':
+          description: Карточка создана
+
+  /cards/{cardId}:
+    patch:
+      summary: Обновить карточку (переместить)
+      tags:
+        - Cards
+      parameters:
+        - name: cardId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [todo, in-progress, done]
+                assignee:
+                  type: string
+      responses:
+        '200':
+          description: Карточка обновлена
+
+components:
+  schemas:
+    Board:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    
+    BoardCreate:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+    
+    Card:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [todo, in-progress, done]
+        assignee:
+          type: string
+        deadline:
+          type: string
+          format: date
+    
+    CardCreate:
+      type: object
+      required:
+        - title
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        deadline:
+          type: string
+          format: date
+        assignee:
+          type: string
